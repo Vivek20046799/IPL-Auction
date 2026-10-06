@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPL Auction Arena - Live Cricket Auction</title>
+  <!-- Google Fonts Inter (Modern Sans Font) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=3" />
+</head>
+<body>
+  <div id="app-container">
+    <!-- CRICBUZZ SIGNATURE TOP NAVIGATION BAR -->
+    <header id="main-header">
+      <div class="header-inner">
+        <div class="header-left">
+          <div class="cricbuzz-brand">
+            <span class="brand-cb">IPL</span><span class="brand-buzz">AUCTION</span>
+          </div>
+          <nav class="cricbuzz-nav">
+            <span class="nav-item active">LIVE AUCTION</span>
+            <span class="nav-item" id="nav-rules-btn">RULES</span>
+            <span class="nav-item" id="nav-squads-btn">SQUADS</span>
+          </nav>
+        </div>
+
+        <div class="header-right">
+          <!-- SPEAKER OPTION TOGGLE -->
+          <button id="toggle-audio-btn" class="btn-speaker" title="Toggle Voice Announcer">
+            SPEAKER: <span id="speaker-status-text">ON</span>
+          </button>
+          <span id="room-code-badge" class="badge-code hidden">ROOM: <strong id="display-room-code">------</strong></span>
+          <span id="user-info-badge" class="badge-user hidden"></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- CRICBUZZ HORIZONTAL MATCH / FRANCHISE TICKER -->
+    <div id="teams-ticker-bar" class="teams-ticker-wrapper hidden">
+      <div class="ticker-heading">TEAMS:</div>
+      <div class="ticker-scroll-container" id="ticker-scroll">
+        <!-- Dynamically rendered horizontal franchise cards -->
+      </div>
+    </div>
+
+    <!-- NOTIFICATION BAR -->
+    <div id="notification-bar" class="hidden"></div>
+
+    <!-- VIEW 1: REGISTRATION & DETAILS ENTRY -->
+    <section id="view-entry" class="view-panel">
+      <div class="card entry-card">
+        <div class="card-header-bar">
+          <span class="badge-live">REGISTRATION</span>
+          <h1 class="panel-heading">IPL AUCTION PARTICIPANT REGISTRATION</h1>
+          <p class="panel-subheading">Enter your participant details, review auction rules, and select your IPL franchise.</p>
+        </div>
+
+        <div class="form-grid-2col">
+          <div class="form-group">
+            <label for="input-name">PARTICIPANT FULL NAME *</label>
+            <input type="text" id="input-name" placeholder="e.g. Rahul Sharma" maxlength="30" autocomplete="off" />
+          </div>
+
+          <div class="form-group">
+            <label for="input-email">EMAIL OR PARTICIPANT ID *</label>
+            <input type="text" id="input-email" placeholder="e.g. rahul@example.com / ID-104" maxlength="50" autocomplete="off" />
+          </div>
+        </div>
+
+        <!-- HORIZONTAL SCROLLING TEAM SELECTOR (NO SCROLL BUTTONS, CLEAN SUBTLE CARDS) -->
+        <div class="form-group">
+          <label>SELECT IPL FRANCHISE (SCROLL HORIZONTALLY TO CHOOSE):</label>
+          <div id="team-selector-scroll" class="horizontal-teams-strip">
+            <!-- Dynamically populated 10 teams -->
+          </div>
+          <div id="selected-team-display" class="selected-team-note">No franchise selected yet. Click a team above to select.</div>
+        </div>
+
+        <!-- PRE-AUCTION RULES BRIEFING CHECKBOX -->
+        <div class="rules-acceptance-box">
+          <div class="rules-summary-title">MANDATORY AUCTION RULES BRIEFING</div>
+          <ul class="rules-summary-list">
+            <li><strong>Purse:</strong> Each franchise begins with a solid purse of ₹100.00 Crore.</li>
+            <li><strong>Overseas Cap:</strong> Maximum 4 overseas players per squad.</li>
+            <li><strong>Timer:</strong> 10-second countdown per player; every valid bid resets timer to 10 seconds.</li>
+            <li><strong>Increments:</strong> Bids below ₹5 Cr increase by +₹0.25 Cr; ₹5–10 Cr by +₹0.50 Cr; above ₹10 Cr by +₹1.00 Cr.</li>
+            <li><strong>Fair Bidding:</strong> The host is a regular participating team and bids under identical rules.</li>
+          </ul>
+          <label class="checkbox-container">
+            <input type="checkbox" id="check-rules-agree" />
+            <span class="checkbox-custom"></span>
+            <span class="checkbox-text">I have read, understood, and agree to the IPL Auction rules.</span>
+          </label>
+        </div>
+
+        <div class="form-actions-split">
+          <div class="action-block">
+            <h3>CREATE NEW AUCTION ROOM</h3>
+            <button id="btn-create-room" class="btn-primary full-width">CREATE ROOM AS HOST</button>
+          </div>
+          <div class="divider-vertical"></div>
+          <div class="action-block">
+            <h3>JOIN EXISTING AUCTION ROOM</h3>
+            <div class="join-input-group">
+              <input type="text" id="input-room-code" placeholder="6-CHAR CODE" maxlength="6" autocomplete="off" />
+              <button id="btn-join-room" class="btn-primary">JOIN</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: LOBBY & HOST QUEUE SELECTION -->
+    <section id="view-lobby" class="view-panel hidden">
+      <div class="card lobby-card">
+        <div class="lobby-header-bar">
+          <div>
+            <span class="badge-live">LOBBY</span>
+            <h2 class="panel-heading">AUCTION LOBBY</h2>
+            <p class="panel-subheading">Waiting for all participating franchise representatives to connect and confirm rules.</p>
+          </div>
+          <div class="room-share-box">
+            <span class="share-lbl">ROOM CODE</span>
+            <div id="lobby-room-code" class="code-highlight">------</div>
+          </div>
+        </div>
+
+        <div class="lobby-teams-status">
+          <div class="sub-header-row">
+            <h3>CONNECTED FRANCHISES</h3>
+            <span class="hint-text">Franchises scroll horizontally</span>
+          </div>
+          <div id="lobby-teams-scroll" class="lobby-teams-horizontal-strip">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- HOST ONLY CONTROLS -->
+        <div id="host-lobby-controls" class="host-box hidden">
+          <div class="host-badge">HOST DASHBOARD</div>
+          <h3>AUCTION CONFIGURATION</h3>
+          <p class="hint-text">Ensure all participants have joined and confirmed rules before starting.</p>
+          
+          <div class="host-actions-row">
+            <div class="form-group-inline">
+              <label for="select-pool-size">PLAYERS TO AUCTION:</label>
+              <select id="select-pool-size">
+                <option value="15">15 Players (Fast Speedrun)</option>
+                <option value="30" selected>30 Players (Standard)</option>
+                <option value="50">50 Players (Extended)</option>
+              </select>
+            </div>
+            <button id="btn-random-queue" class="btn-secondary">SELECT RANDOM PLAYERS</button>
+            <button id="btn-start-auction" class="btn-primary btn-large">START LIVE AUCTION</button>
+          </div>
+          <div id="queue-status-text" class="status-note">No players queued yet. Click 'SELECT RANDOM PLAYERS'.</div>
+        </div>
+
+        <div id="guest-waiting-msg" class="guest-msg">
+          Waiting for the host to finalize player selection and launch the live auction...
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: MAIN AUCTION ARENA (FIT-TO-VIEWPORT, NO EMPTY SPACE, BID BUTTON ALWAYS VISIBLE) -->
+    <section id="view-arena" class="view-panel arena-viewport hidden">
+      <div class="arena-grid">
+        <!-- LEFT COLUMN: SCROLLABLE FRANCHISE PURSES -->
+        <aside class="arena-col teams-col card">
+          <div class="col-header-row">
+            <h2 class="col-title">FRANCHISES</h2>
+            <span class="scroll-tag">SCROLL LIST</span>
+          </div>
+          <div id="arena-teams-list" class="teams-purse-scrollable-list">
+            <!-- Scrollable franchise purse cards -->
+          </div>
+        </aside>
+
+        <!-- CENTER COLUMN: ACTIVE PLAYER & LIVE BIDDING SCORECARD -->
+        <main class="arena-col main-col card">
+          <!-- TOP BAR WITH ANIMATED PROGRESS LINE -->
+          <div class="arena-top-bar">
+            <div class="top-bar-meta">
+              <div class="match-status-tag">
+                <span class="live-dot"></span> LIVE PLAYER BIDDING
+              </div>
+              <div class="timer-box">
+                <span class="timer-tag">TIMER</span>
+                <div id="countdown-display" class="timer-digit">10s</div>
+              </div>
+            </div>
+            <!-- ANIMATED DECREASING COUNTDOWN LINE -->
+            <div class="countdown-line-track">
+              <div id="countdown-progress-line" class="countdown-progress-line"></div>
+            </div>
+          </div>
+
+          <!-- COMPACT PLAYER SCORECARD -->
+          <div id="player-card" class="player-card-box">
+            <div class="player-image-wrap">
+              <img id="player-img" src="" alt="Player Profile" />
+              <div id="player-role-badge" class="badge-role">ROLE</div>
+              <div id="player-overseas-badge" class="badge-overseas hidden">[OVERSEAS]</div>
+            </div>
+            <div class="player-details">
+              <h1 id="player-name" class="player-title">PAT CUMMINS</h1>
+              <div id="player-nationality" class="player-subtitle">AUSTRALIA</div>
+              
+              <div class="stats-table">
+                <div class="stat-cell">
+                  <span class="stat-head">ROLE</span>
+                  <span id="player-role-stat" class="stat-body">BOWLER</span>
+                </div>
+                <div class="stat-cell">
+                  <span class="stat-head">BATTING</span>
+                  <span id="player-batting-stat" class="stat-body">56</span>
+                </div>
+                <div class="stat-cell">
+                  <span class="stat-head">BOWLING</span>
+                  <span id="player-bowling-stat" class="stat-body">70</span>
+                </div>
+                <div class="stat-cell highlight-cell">
+                  <span class="stat-head">BASE PRICE</span>
+                  <span id="player-base-price" class="stat-body">₹2.00 Cr</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BIDDING SCOREBOARD & ALWAYS-VISIBLE BID BUTTON -->
+          <div class="bidding-control-box">
+            <div class="bidding-scoreboard">
+              <div class="score-item">
+                <span class="score-label">CURRENT HIGHEST BID</span>
+                <span id="display-current-bid" class="score-value">₹0.00 Cr</span>
+                <span id="display-highest-bidder" class="score-sub">WAITING FOR OPENING BID</span>
+              </div>
+              <div class="score-item">
+                <span class="score-label">NEXT MANDATORY BID</span>
+                <span id="display-next-bid" class="score-value text-accent">₹2.00 Cr</span>
+                <span id="display-my-purse" class="score-sub">YOUR PURSE: ₹100.00 Cr</span>
+              </div>
+            </div>
+
+            <!-- PROMINENT DIRECT BID BUTTON (ALWAYS VISIBLE WITHOUT SCROLLING) -->
+            <button id="btn-place-bid" class="btn-bid">
+              SUBMIT BID: <span id="btn-bid-amount">₹2.00 Cr</span>
+            </button>
+            <div id="bid-status-message" class="bid-status-note"></div>
+          </div>
+        </main>
+
+        <!-- RIGHT COLUMN: REAL-TIME AUCTION FEED -->
+        <aside class="arena-col activity-col card">
+          <div class="col-header-row">
+            <h2 class="col-title">AUCTION FEED</h2>
+            <span class="live-pill">REAL-TIME</span>
+          </div>
+          <div id="activity-feed" class="activity-log-feed">
+            <!-- Dynamic ball-by-ball bidding feed -->
+          </div>
+
+          <div id="host-arena-controls" class="host-arena-box hidden">
+            <span class="host-tag">AUCTIONEER ACTIONS</span>
+            <button id="btn-skip-player" class="btn-danger full-width">MARK UNSOLD / SKIP</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- VIEW 4: AUCTION COMPLETED (FINAL SQUADS) -->
+    <section id="view-completed" class="view-panel hidden">
+      <div class="card completed-card">
+        <div class="card-header-bar">
+          <span class="badge-live">SUMMARY</span>
+          <h1 class="panel-heading">AUCTION COMPLETED — FINAL SQUADS</h1>
+          <p class="panel-subheading">Final team rosters, expenditures, and remaining purse balances.</p>
+        </div>
+
+        <div id="final-squads-container" class="final-squads-grid">
+          <!-- Populated via JS -->
+        </div>
+
+        <div class="form-actions-center">
+          <button id="btn-back-lobby" class="btn-primary">RETURN TO LOBBY</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RULES MODAL (ACCESSIBLE ANYTIME VIA NAV) -->
+    <div id="rules-modal" class="modal-backdrop hidden">
+      <div class="rules-modal-card">
+        <div class="modal-header">
+          <h2>IPL AUCTION OFFICIAL RULES & REGULATIONS</h2>
+          <button id="btn-close-rules" class="btn-close">&times;</button>
+        </div>
+        <div class="rules-modal-body">
+          <div class="rule-block">
+            <h3>1. FRANCHISE PURSE</h3>
+            <p>Every team begins with a solid purse of ₹100.00 Crore. Bids are automatically deducted from the winning team's purse upon player sale.</p>
+          </div>
+          <div class="rule-block">
+            <h3>2. OVERSEAS PLAYER RESTRICTION</h3>
+            <p>Each squad can acquire a maximum of 4 Overseas players. Once 4 overseas slots are filled, the system blocks the team from bidding on further overseas players.</p>
+          </div>
+          <div class="rule-block">
+            <h3>3. 10-SECOND AUCTION TIMER</h3>
+            <p>Each player starts with a 10-second countdown. Every valid bid immediately resets the countdown back to 10 seconds. When the timer hits 0s, the player is sold to the highest bidder or marked unsold if no bids were received.</p>
+          </div>
+          <div class="rule-block">
+            <h3>4. BID INCREMENTS</h3>
+            <p>Bids below ₹5.00 Cr increase by ₹0.25 Cr. Bids between ₹5.00 Cr and ₹10.00 Cr increase by ₹0.50 Cr. Bids exceeding ₹10.00 Cr increase by ₹1.00 Cr.</p>
+          </div>
+          <div class="rule-block">
+            <h3>5. EQUAL PARTICIPATION</h3>
+            <p>The host creates and manages the room, but bids as an equal participant under identical purse and overseas limitations.</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-rules-ack" class="btn-primary full-width">I UNDERSTAND THE RULES</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOLID MODAL OVERLAY: SOLD / UNSOLD BANNER (SMOOTH POPUP TRANSITION) -->
+    <div id="resolution-overlay" class="modal-backdrop hidden">
+      <div id="resolution-modal" class="resolution-card">
+        <div id="resolution-tag" class="resolution-tag">SOLD</div>
+        <h2 id="resolution-player-name" class="resolution-player">PAT CUMMINS</h2>
+        <div id="resolution-details" class="resolution-info">
+          PRICE: ₹6.50 CRORE <br />
+          SOLD TO: CHENNAI SUPER KINGS
+        </div>
+        <div class="resolution-timer" id="resolution-timer-msg">NEXT PLAYER IN <span id="resolution-countdown-num">3</span>s...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Socket.IO Client Library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js?v=3"></script>
+</body>
+</html>
